@@ -1,0 +1,4 @@
+databaseChangeLog:
+  - include:
+      file: changeset/create-author-table.yaml
+      relativeToChangeLogFile: true

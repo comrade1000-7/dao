@@ -1,7 +1,6 @@
 package org.example.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -17,27 +16,31 @@ import java.util.stream.Collectors;
 @Repository
 public class DAORepository {
 
-    private static final String scriptFile = "select_product_name.sql";
-    private final String scriptFile2;
+    //private static final String scriptFile = "select_product_name.sql";
+    private final String scriptFile;
     @Autowired
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     public DAORepository(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.scriptFile2 = read();
+        this.scriptFile = read("select_product_name.sql");
     }
 
-    private static String read() {
-        try (InputStream inputStream = new ClassPathResource(DAORepository.scriptFile).getInputStream();
-             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+    private static String read(String scriptFile) {
+        try (InputStream is = new ClassPathResource(scriptFile).getInputStream();
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is))) {
             return bufferedReader.lines().collect(Collectors.joining("\n"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public List<String> getProductName(String name) {
-        return jdbcTemplate.query(scriptFile2, Map.of("name", name),
+    /*public List<String> getProductName(String name) {
+        return jdbcTemplate.query(scriptFile, Map.of("name", name),
                 ((rs, rowNum) -> rs.getString("product_name")));
+    }*/
+
+    public List<String> getProductName(String name) {
+        return jdbcTemplate.queryForList(scriptFile, Map.of("name", name), String.class);
     }
 }
